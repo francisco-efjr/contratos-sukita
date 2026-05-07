@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @page { size: A4; margin: 2.5cm 2cm; }
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    text-align: center;
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 18pt;
+  }
+  .section-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 10pt;
+    margin-bottom: 2pt;
+  }
+  .clause-title {
+    font-weight: bold;
+    margin-top: 8pt;
+  }
+  .signature-block {
+    margin-top: 30pt;
+  }
+  .signature-line {
+    margin-top: 30pt;
+    border-top: 1px solid #000;
+    width: 60%;
+    margin-bottom: 2pt;
+  }
+  .bold { font-weight: bold; }
+  .upper { text-transform: uppercase; }
+  p { margin: 4pt 0; text-align: justify; }
+  .center { text-align: center; }
+  .clause-sections { margin-top: 12pt; }
+</style>
+</head>
+<body>
+
+<h1>Contrato de Locação de Imóvel</h1>
+
+<p><span class="section-title">Locador:</span><br>
+Francisco Edson Ferreira, brasileiro (a), solteiro (a), comerciante, portador da cédula de
+Identidade Nº 99340586, inscrito no Cadastro de Pessoas Físicas (CPF) 348.807.553-20,
+residente e domiciliado nesta cidade na Rua Bom Pastor Nº 84 Flores Manaus-am.
+Fone: (92) 99384-8292 e 98136-9698.</p>
+
+<p><span class="section-title">Locatário:</span><br>
+<span class="bold">{{TENANT_NAME}}</span> CPF: <span class="bold">{{CPF}}</span>
+portador da Cédula de Identidade Nº {{RG}} residente e domiciliado nesta cidade.</p>
+
+<p><span class="section-title">Imóvel objeto desta locação:</span><br>
+Localização: {{PROPERTY_ADDRESS}}<br>
+UC. {{UC_CODE}}<br>
+Uso ou Finalidade: Residencial</p>
+
+<p class="upper bold">
+O Locador autoriza o Locatário e o Locatário autoriza o Locador a transferir titularidade
+de energia elétrica e outros serviços para o nome do inquilino durante a vigência do
+Contrato de Locação. UC. {{UC_CODE}}
+</p>
+
+<p><span class="section-title">Valor do aluguel:</span><br>
+Aluguel mensal - <span class="bold">R$ {{RENT_VALUE}} ({{RENT_VALUE_WORDS}})</span></p>
+
+<p><span class="section-title">Prazo desta locação:</span><br>
+Período de <span class="bold">{{TERM_MONTHS}} ({{TERM_MONTHS_WORDS}})</span><br>
+Início: {{START_DATE}}<br>
+Término: {{END_DATE}}<br>
+Local e data do pagamento: No dia {{PAYMENT_DAY}} de cada mês</p>
+
+<div class="clause-sections">
+<p class="center bold">Cláusulas Contratuais:</p>
+<p>Os signatários deste instrumento, devidamente qualificados têm entre si justos e acertados o
+presente Contrato de Locação, que se regerá pela Lei 8.245/91 e pelas cláusulas e condições a
+seguir estipuladas e aceitas.</p>
+
+<p class="clause-title">Primeira</p>
+<p>O prazo desta locação é o constante no início deste Contrato. No término indicado, o
+locatário se obriga a entregar o imóvel livre e desembaraçado de coisas e pessoas, no estado em
+que o recebeu independentemente de notificação ou interpelação judicial, ressalvada a hipótese
+de prorrogação de locação, o que somente se fará por escrito.</p>
+<p><span class="bold">Parágrafo Único</span> — Caso o locatário não restitua o imóvel no fim do prazo contratual, pagará
+enquanto estiver na posse do mesmo o aluguel mensal reajustado nos termos da cláusula
+décima-sétima, até a efetiva desocupação do imóvel objeto deste instrumento.</p>
+
+<p class="clause-title">Segunda</p>
+<p>Todos os impostos e taxas que atualmente recaem sobre os imóveis locados, bem
+como qualquer aumento do mesmo, ou novos que venham a ser criados pelo poder público, são
+de inteira responsabilidade do locatário, que se obriga a pagá-los ao locador para que este os
+liquide em seus respectivos vencimentos. São ainda de responsabilidade do locatário as contas
+de água, luz e gás, assim como as despesas de condomínio ficando o locador responsável por
+qualquer dívida anterior a data de assinatura do contrato.</p>
+<p><span class="bold">Parágrafo Primeiro</span> — O locatário será responsável pelas despesas e multas decorrentes de
+eventuais retenções dos avisos de impostos, taxas e outros que já incidem ou venham a incidir
+sobre o imóvel objeto da presente locação.</p>
+<p><span class="bold">Parágrafo Segundo</span> — Os recibos referentes aos impostos e taxas serão entregues juntamente
+com os do aluguel correspondente ao mês, fazendo parte integrante do mesmo.</p>
+
+<p class="clause-title">Terceira</p>
+<p>A falta de pagamento dos aluguéis, nas épocas dos vencimentos, previamente
+determinados, serão acrescidas da multa de 10% mais juros de mora de 1% ao mês,
+independentemente de qualquer notificação, interpelação ou aviso extrajudicial conforme Lei do
+Inquilinato.</p>
+
+<p class="clause-title">Quarta</p>
+<p>Excetuadas as obras ou reparações que sejam necessárias à segurança do imóvel,
+obriga-se o locatário pelas demais, devendo manter o imóvel locado e seus pertences, que ora
+recebe, em perfeito estado de funcionamento, conservação e limpeza, notadamente as
+instalações sanitárias e elétricas, vidros e pinturas, fato que é comprovado pelo locatário e seu
+fiador.</p>
+
+<p class="clause-title">Quinta</p>
+<p>Todas as benfeitorias que forem feitas, excluídas naturalmente as instalações de
+natureza profissional e móveis, ficarão integradas ao imóvel, sem que, por elas, tenha o locatário
+direito a qualquer indenização ou pagamento. A introdução de tais benfeitorias dependerá da
+autorização por escrito do locador.</p>
+<p><span class="bold">Parágrafo Único</span> — Quando do término da locação, o locatário restituirá o imóvel nas mesmas
+condições em que o recebe agora, ficando desde já convencionado que, se não o fizer, o locador
+estará autorizado a mandar executar todos os reparos necessários, cobrando do locatário a
+importância gasta, como encargos de locação.</p>
+
+<p class="clause-title">Sexta</p>
+<p>A falta de pagamento, nas épocas supra determinadas, dos aluguéis e encargos, por si só
+constituirá o locatário em mora, independentemente de qualquer notificação, interpelação ou
+aviso extrajudicial. Faz parte integrante do presente Contrato o Regulamento Interno do prédio,
+que o locatário reconhece e aceita.</p>
+
+<p class="clause-title">Sétima</p>
+<p>É expressamente vedado ao locatário sublocar o imóvel no todo ou em parte, cedê-lo a
+terceiros, seja a título gratuito ou oneroso, transferir o contrato ou dar destinação diversa do uso
+ou finalidade previstos neste Contrato, sem prévia anuência por escrito do locador.</p>
+
+<p class="clause-title">Oitava</p>
+<p>No caso de desapropriação do imóvel objeto deste Contrato, o locador e seus
+administradores e/ou procurador ficarão exonerados de toda e qualquer responsabilidade
+decorrente deste Contrato, ressalvando-se ao locatário a faculdade de agir tão somente contra o
+poder expropriante.</p>
+
+<p class="clause-title">Nona</p>
+<p>Fica o locador, por si ou por seus prepostos, autorizado a vistoriar o imóvel sempre que
+julgar conveniente.</p>
+
+<p class="clause-title">Décima</p>
+<p>O locatário se obriga a satisfazer, por sua conta exclusiva, a qualquer exigência dos
+poderes públicos, em razão da atividade exercida no imóvel, assumindo toda a responsabilidade
+por quaisquer infrações em que recorrer a esse propósito, por inobservância das determinações
+das autoridades competentes.</p>
+
+<p class="clause-title">Décima-primeira</p>
+<p>O locatário declara, neste ato, ter pleno conhecimento de que o resgate de recibos
+posteriores não significa nem representa quitação de outras obrigações estipuladas no presente
+Contrato, deixadas de cobrar nas épocas certas, principalmente os encargos fixados nesse
+Contrato.</p>
+
+<p class="clause-title">Décima-segunda</p>
+<p>Se o locador admitir, em benefício do locatário, qualquer atraso no pagamento do
+aluguel e demais despesas que lhe incumba, ou no cumprimento de qualquer outra obrigação
+contratual, essa tolerância não poderá ser considerada como alteração das condições deste
+contrato, nem dará ensejo à invocação do Artigo 1.503-I do Código Civil Brasileiro por parte do
+fiador, pois se constituirá em ato de mera liberdade do locador.</p>
+
+<p class="clause-title">Décima-terceira</p>
+<p>Tudo o que for devido em razão deste Contrato será cobrado em Processo Executivo ou
+em ação apropriada, no foro da situação do imóvel, com renúncia de qualquer outro, por mais
+privilegiado que sejam, correndo por conta da parte vencida, além do principal e da multa
+estipulada na cláusula Décima-quarta, todas as despesas judiciais e extrajudiciais, mais 20%
+(vinte por cento) de honorários advocatícios.</p>
+
+<p class="clause-title">Décima-quarta</p>
+<p>Fica estipulada a multa de 01 (um) aluguel vigente à época da infração, na qual incorrer
+a parte que infringir uma das cláusulas deste Contrato, ressalvada à parte inocente o direito de
+poder considerar simultaneamente rescindida a locação, independentemente de qualquer outra
+formalidade judicial ou extrajudicial. A multa será sempre paga integralmente, seja qual for o
+prazo decorrido do presente Contrato, ficando claro que o pagamento dessa multa não exime o
+pagamento dos aluguéis atrasados, além das despesas inerentes ao caso.</p>
+<p><span class="bold">Parágrafo Único</span> — Quando houver quebra de contrato antes do término do contrato, o
+locatário só fica isento de multa no caso de transferência do local de trabalho para outro
+estado.</p>
+
+<p class="clause-title">Décima-quinta</p>
+<p>Como garantia assina também, na qualidade de fiador (es) o qualificado no início deste
+Contrato, sendo solidário com o locatário em todas as obrigações aqui assumidas.</p>
+<p><span class="bold">Parágrafo Único</span> — Fica desde já expressamente convencionado que, em qualquer hipótese, a
+responsabilidade do(s) fiador (es) permanecerá integral, sem solução da continuidade e sem
+limitação de tempo, sempre e até a real e efetiva entrega do imóvel, em igualdade de condições
+com o afiançado, também na hipótese de vir a prorrogar-se a presente locação, abrindo mão,
+desde já o fiador da faculdade de exoneração prevista no Artigo 1.500 do Código Civil
+Brasileiro.</p>
+
+<p class="clause-title">Décima-sexta</p>
+<p>No caso de morte, falência ou insolvência do fiador, o locatário se obriga a apresentar,
+dentro de 30 (trinta) dias, substituto idôneo, a juízo do locador, sob pena de incorrer nas
+sanções previstas na cláusula décima-quarta do presente Contrato.</p>
+
+<p class="clause-title">Décima Sétima</p>
+<p>Na hipótese de ocorrer a prorrogação desta locação o aluguel mensal será reajustado de
+acordo com os índices permitidos pela legislação em vigor à época da prorrogação, com
+prioridade para o IGPM/FGV.</p>
+<p><span class="bold">Parágrafo Único</span> — Acordam LOCADOR e LOCATÁRIOS que o inadimplemento de
+obrigações previstas neste contrato poderá ensejar a NEGATIVIDADE da parte inadimplente
+junto ao SPC/SERASA, assim como o protesto dos alugueres e taxas eventualmente em atraso
+em Cartório de Títulos e Documentos.</p>
+
+<p class="clause-title">Do Foro</p>
+<p class="clause-title">Décima oitava</p>
+<p>Para dirimir quaisquer controvérsias oriundas do Contrato, as partes elegem o foro da
+comarca de MANAUS-AM. E, por estarem justas, contratadas, cientes e de acordo com todas
+as cláusulas e condições do presente Contrato de Locação, as partes por si, seus herdeiros e
+sucessores assinam este instrumento nas suas 03 (Quatro) vias para um só efeito, na presença
+das testemunhas abaixo.</p>
+</div>
+
+<!-- Página de assinatura -->
+<div class="signature-block">
+  <p>Manaus, {{SIGNATURE_DATE}}</p>
+
+  <p class="bold">Locatários:</p>
+  <div class="signature-line"></div>
+  <p><span class="bold upper">{{TENANT_NAME_UPPER}}</span><br>
+  CPF: <span class="bold">{{CPF}}</span></p>
+
+  <br><br>
+  <p class="bold">Locador:</p>
+  <div class="signature-line"></div>
+  <p><span class="bold upper">Francisco Edson Ferreira</span><br>
+  CPF: 348.807.553-20</p>
+</div>
+
+</body>
+</html>
