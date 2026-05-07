@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -22,37 +20,77 @@ fun ApartmentListScreen(
     onApartmentSelected: () -> Unit
 ) {
     val apartments by vm.apartments.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+
+    // Agrupa por conjunto e filtra pela busca
+    val grouped = remember(apartments, searchQuery) {
+        apartments
+            .filter {
+                searchQuery.isBlank() ||
+                it.name.contains(searchQuery, ignoreCase = true) ||
+                it.conjunto.contains(searchQuery, ignoreCase = true)
+            }
+            .groupBy { it.conjunto }
+            .toSortedMap()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Selecionar Imóvel") })
         }
     ) { padding ->
-        if (apartments.isEmpty()) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Campo de busca
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Buscar imóvel ou conjunto…") },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(apartments) { apt ->
-                    ApartmentCard(
-                        apartment = apt,
-                        onClick = {
-                            vm.selectApartment(apt)
-                            onApartmentSelected()
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                singleLine = true
+            )
+
+            if (apartments.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
+            } else if (grouped.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { Text("Nenhum imóvel encontrado.") }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    grouped.forEach { (conjunto, apts) ->
+                        // Cabeçalho do conjunto
+                        item {
+                            Text(
+                                text = conjunto,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                            )
                         }
-                    )
+                        items(apts) { apt ->
+                            ApartmentCard(
+                                apartment = apt,
+                                onClick = {
+                                    vm.selectApartment(apt)
+                                    onApartmentSelected()
+                                }
+                            )
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
             }
         }
@@ -67,24 +105,26 @@ private fun ApartmentCard(apartment: Apartment, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Text(
                 text = apartment.name,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = apartment.address,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "UC: ${apartment.ucCode}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
+            if (apartment.ucCode.isNotBlank()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "UC: ${apartment.ucCode}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                )
+            }
         }
     }
 }
