@@ -7,6 +7,7 @@ import com.sukita.contratos.ContratosApp
 import com.sukita.contratos.data.ApartmentRepository
 import com.sukita.contratos.model.Apartment
 import com.sukita.contratos.model.ContractData
+import com.sukita.contratos.ocr.BrazilianDocumentParser
 import com.sukita.contratos.util.CpfFormatter
 import com.sukita.contratos.util.CurrencyFormatter
 import com.sukita.contratos.util.DateCalculator
@@ -18,6 +19,13 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel compartilhado entre todas as telas do fluxo de geração de contrato.
+ *
+ * Armazenamento de campos:
+ *  - cpf           → dígitos brutos, máx. 11  (ex: "07844070293")
+ *  - startDate     → dígitos brutos, máx. 8   (ex: "07052026")
+ *  - signatureDate → dígitos brutos, máx. 8
+ * As máscaras visuais (CpfVisualTransformation / DateVisualTransformation) são
+ * aplicadas apenas na camada de UI; o ViewModel nunca armazena strings formatadas.
  */
 class ContractViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -46,13 +54,13 @@ class ContractViewModel(application: Application) : AndroidViewModel(application
 
     // ─── Campos do formulário ─────────────────────────────────────────────────
     private val _tenantName    = MutableStateFlow("")
-    private val _cpf           = MutableStateFlow("")
+    private val _cpf           = MutableStateFlow("")   // dígitos brutos, máx. 11
     private val _rg            = MutableStateFlow("")
     private val _rentInput     = MutableStateFlow("")   // Ex: "650,00"
     private val _termMonths    = MutableStateFlow("")   // Ex: "12"
-    private val _startDate     = MutableStateFlow("")   // DD/MM/YYYY
+    private val _startDate     = MutableStateFlow("")   // dígitos brutos DD/MM/YYYY → "07052026"
     private val _paymentDay    = MutableStateFlow("")   // 1-31
-    private val _signatureDate = MutableStateFlow("")   // DD/MM/YYYY
+    private val _signatureDate = MutableStateFlow("")   // dígitos brutos, máx. 8
 
     val tenantName:    StateFlow<String> = _tenantName.asStateFlow()
     val cpf:           StateFlow<String> = _cpf.asStateFlow()
@@ -63,28 +71,32 @@ class ContractViewModel(application: Application) : AndroidViewModel(application
     val paymentDay:    StateFlow<String> = _paymentDay.asStateFlow()
     val signatureDate: StateFlow<String> = _signatureDate.asStateFlow()
 
-    // Calculado automaticamente
-    val endDate: StateFlow<String>
-        get() = MutableStateFlow(
-            if (_startDate.value.length == 10 && (_termMonths.value.toIntOrNull() ?: 0) > 0)
-                DateCalculator.calcEndDate(_startDate.value, _termMonths.value.toInt()) ?: ""
-            else ""
-        ).asStateFlow()
+    // ─── Setters ──────────────────────────────────────────────────────────────
 
     fun setTenantName(v: String)    { _tenantName.value    = v }
-    fun setCpf(v: String)           { _cpf.value           = CpfFormatter.format(v) }
-    fun setRg(v: String)            { _rg.value            = v }
+
+    /** Armazena apenas dígitos do CPF (máx. 11) — sem máscara. */
+    fun setCpf(v: String)           { _cpf.value           = v.filter { it.isDigit() }.take(11) }
+
+    /** Mantem numero, digito verificador e orgao emissor do RG quando existirem. */
+    fun setRg(v: String)            { _rg.value            = BrazilianDocumentParser.normalizeRg(v) }
     fun setRentInput(v: String)     { _rentInput.value     = v }
     fun setTermMonths(v: String)    { _termMonths.value    = v.filter { it.isDigit() } }
-    fun setStartDate(v: String)     { _startDate.value     = DateCalculator.applyMask(v) }
+
+    /** Armazena apenas dígitos da data de início (máx. 8) — sem máscara. */
+    fun setStartDate(v: String)     { _startDate.value     = v.filter { it.isDigit() }.take(8) }
+
     fun setPaymentDay(v: String)    { _paymentDay.value    = v.filter { it.isDigit() }.take(2) }
-    fun setSignatureDate(v: String) { _signatureDate.value = DateCalculator.applyMask(v) }
+
+    /** Armazena apenas dígitos da data de assinatura (máx. 8) — sem máscara. */
+    fun setSignatureDate(v: String) { _signatureDate.value = v.filter { it.isDigit() }.take(8) }
 
     /** Preenche nome, CPF e RG a partir da leitura OCR de um documento */
     fun fillFromOcr(name: String?, cpf: String?, rg: String?) {
         if (!name.isNullOrBlank()) _tenantName.value = NameFormatter.capitalize(name)
-        if (!cpf.isNullOrBlank())  _cpf.value        = CpfFormatter.format(cpf)
-        if (!rg.isNullOrBlank())   _rg.value         = rg.trim()
+        // Armazena apenas dígitos brutos do CPF retornado pelo OCR
+        if (!cpf.isNullOrBlank())  _cpf.value        = CpfFormatter.digitsOnly(cpf).take(11)
+        if (!rg.isNullOrBlank())   _rg.value         = BrazilianDocumentParser.normalizeRg(rg)
     }
 
     // ─── Validação ────────────────────────────────────────────────────────────
@@ -104,57 +116,96 @@ class ContractViewModel(application: Application) : AndroidViewModel(application
         ).any { it != null }
     }
 
-    fun validate(): FormErrors {
-        val months = _termMonths.value.toIntOrNull()
-        val day    = _paymentDay.value.toIntOrNull()
+    /**
+     * Valida apenas os campos da página 1 (formulário de dados do contrato).
+     * NÃO valida signatureDate, que é preenchida na página 2.
+     */
+    fun validatePage1(): FormErrors {
+        val months         = _termMonths.value.toIntOrNull()
+        val day            = _paymentDay.value.toIntOrNull()
+        val startFormatted = DateCalculator.applyMask(_startDate.value)
         return FormErrors(
-            tenantName    = if (_tenantName.value.isBlank()) "Nome obrigatório" else null,
-            cpf           = when {
+            tenantName = if (_tenantName.value.isBlank()) "Nome obrigatório" else null,
+            cpf        = when {
                 _cpf.value.isBlank()              -> "CPF obrigatório"
                 !CpfFormatter.isValid(_cpf.value) -> "CPF inválido"
                 else                              -> null
             },
-            rg            = if (_rg.value.isBlank()) "RG obrigatório" else null,
-            rentValue     = if (CurrencyFormatter.parseToCents(_rentInput.value) == null) "Valor inválido" else null,
-            termMonths    = when {
-                months == null  -> "Prazo obrigatório"
-                months <= 0     -> "Prazo deve ser maior que zero"
-                else            -> null
+            rg        = if (_rg.value.isBlank()) "RG obrigatório" else null,
+            rentValue = if (CurrencyFormatter.parseToCents(_rentInput.value) == null) "Valor inválido" else null,
+            termMonths = when {
+                months == null -> "Prazo obrigatório"
+                months <= 0    -> "Prazo deve ser maior que zero"
+                else           -> null
             },
-            startDate     = DateCalculator.validate(_startDate.value),
+            startDate  = DateCalculator.validate(startFormatted),
+            paymentDay = when {
+                day == null   -> "Dia obrigatório"
+                day !in 1..31 -> "Dia deve ser entre 1 e 31"
+                else          -> null
+            },
+            signatureDate = null   // página 1 não valida data de assinatura
+        )
+    }
+
+    /** Valida todos os campos (página 1 + página 2). */
+    fun validate(): FormErrors {
+        val months         = _termMonths.value.toIntOrNull()
+        val day            = _paymentDay.value.toIntOrNull()
+        val startFormatted = DateCalculator.applyMask(_startDate.value)
+        val sigFormatted   = DateCalculator.applyMask(_signatureDate.value)
+        return FormErrors(
+            tenantName = if (_tenantName.value.isBlank()) "Nome obrigatório" else null,
+            cpf        = when {
+                _cpf.value.isBlank()              -> "CPF obrigatório"
+                !CpfFormatter.isValid(_cpf.value) -> "CPF inválido"
+                else                              -> null
+            },
+            rg        = if (_rg.value.isBlank()) "RG obrigatório" else null,
+            rentValue = if (CurrencyFormatter.parseToCents(_rentInput.value) == null) "Valor inválido" else null,
+            termMonths = when {
+                months == null -> "Prazo obrigatório"
+                months <= 0    -> "Prazo deve ser maior que zero"
+                else           -> null
+            },
+            startDate     = DateCalculator.validate(startFormatted),
             paymentDay    = when {
-                day == null      -> "Dia obrigatório"
-                day !in 1..31    -> "Dia deve ser entre 1 e 31"
-                else             -> null
+                day == null   -> "Dia obrigatório"
+                day !in 1..31 -> "Dia deve ser entre 1 e 31"
+                else          -> null
             },
-            signatureDate = DateCalculator.validate(_signatureDate.value)
+            signatureDate = DateCalculator.validate(sigFormatted)
         )
     }
 
     // ─── Monta o ContractData final ───────────────────────────────────────────
     fun buildContractData(): ContractData? {
-        val apt   = _selectedApartment.value ?: return null
-        val cents = CurrencyFormatter.parseToCents(_rentInput.value) ?: return null
+        val apt    = _selectedApartment.value ?: return null
+        val cents  = CurrencyFormatter.parseToCents(_rentInput.value) ?: return null
         val months = _termMonths.value.toIntOrNull() ?: return null
-        val endDt  = DateCalculator.calcEndDate(_startDate.value, months) ?: return null
+        // Converte dígitos brutos para DD/MM/YYYY antes de usar
+        val startFormatted = DateCalculator.applyMask(_startDate.value)
+        val sigFormatted   = DateCalculator.applyMask(_signatureDate.value)
+        val endDt  = DateCalculator.calcEndDate(startFormatted, months) ?: return null
         return ContractData(
             apartment      = apt,
             tenantName     = NameFormatter.capitalize(_tenantName.value),
-            cpf            = _cpf.value,
+            cpf            = CpfFormatter.format(_cpf.value),   // formata apenas para o PDF
             rg             = _rg.value,
             rentValueCents = cents,
             termMonths     = months,
-            startDate      = _startDate.value,
+            startDate      = startFormatted,
             paymentDay     = _paymentDay.value.toInt(),
-            signatureDate  = _signatureDate.value
+            signatureDate  = sigFormatted
         )
     }
 
     /** Calcula e expõe a data fim como string (para exibição em tempo real) */
     fun computedEndDate(): String {
         val months = _termMonths.value.toIntOrNull() ?: return ""
-        if (_startDate.value.length < 10) return ""
-        return DateCalculator.calcEndDate(_startDate.value, months) ?: ""
+        val startFormatted = DateCalculator.applyMask(_startDate.value)
+        if (startFormatted.length < 10) return ""
+        return DateCalculator.calcEndDate(startFormatted, months) ?: ""
     }
 
     fun resetForm() {

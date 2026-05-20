@@ -23,10 +23,5 @@ data class ContractData(
     val signatureDate: String      // DD/MM/YYYY
 ) {
     /** Retorna o valor formatado: R$ 650,00 */
-    fun formattedRentValue(): String {
-        val reais = rentValueCents / 100
-        val cents = rentValueCents % 100
-        return "R\$ %,d,%02d".format(reais, cents)
-            .replace(",", "X").replace(".", ",").replace("X", ".")
-    }
+    fun formattedRentValue(): String = "R\$ ${com.sukita.contratos.util.CurrencyFormatter.format(rentValueCents)}"
 }

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Internet — necessário para envio à API OpenAI Vision (somente quando o usuário optar por IA) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Câmera para leitura de documento -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
