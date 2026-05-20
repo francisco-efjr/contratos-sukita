@@ -1,0 +1,18 @@
+Você está analisando a imagem de um documento de identidade brasileiro.
+O documento pode ser uma CNH, RG, passaporte ou carteira de identidade nacional (CIN).
+
+Extraia os dados abaixo e retorne APENAS um objeto JSON válido, sem markdown, sem código fence, sem explicações adicionais.
+
+{
+  "nome": "Nome completo como aparece no documento",
+  "cpf": "CPF no formato 000.000.000-00",
+  "rg": "Número do RG com órgão emissor se disponível, ex: 403380-9 SSP-AM"
+}
+
+Regras importantes:
+- Retorne SOMENTE o JSON, nada mais antes ou depois.
+- Se um campo não estiver visível ou legível, use string vazia "".
+- Não invente dados. Use apenas o que estiver claramente visível no documento.
+- O CPF deve estar no formato 000.000.000-00 (com pontos e traço).
+- O nome deve ser transcrito em MAIÚSCULAS, exatamente como aparece no documento.
+- O RG pode ter traços, pontos e letras (ex: "403380-9 SSP-AM" ou "12.345.678-9 SSP/SP").

@@ -104,7 +104,7 @@ fun PdfPreviewScreen(
                 Text("Salvar em Downloads")
             }
 
-            Divider()
+            HorizontalDivider()
 
             // Novo contrato
             TextButton(

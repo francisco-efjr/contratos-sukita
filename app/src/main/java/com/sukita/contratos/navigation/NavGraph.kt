@@ -11,6 +11,7 @@ import com.sukita.contratos.ui.screens.ContractFormScreen
 import com.sukita.contratos.ui.screens.DocumentScanScreen
 import com.sukita.contratos.ui.screens.FinalPageScreen
 import com.sukita.contratos.ui.screens.PdfPreviewScreen
+import com.sukita.contratos.ui.screens.SettingsScreen
 import com.sukita.contratos.viewmodel.ContractViewModel
 
 sealed class Screen(val route: String) {
@@ -18,6 +19,7 @@ sealed class Screen(val route: String) {
     object DocumentScan  : Screen("document_scan")
     object ContractForm  : Screen("contract_form")
     object FinalPage     : Screen("final_page")
+    object Settings      : Screen("settings")
     object PdfPreview    : Screen("pdf_preview/{pdfPath}") {
         fun withPath(path: String) = "pdf_preview/$path"
     }
@@ -35,8 +37,13 @@ fun NavGraph(
         composable(Screen.ApartmentList.route) {
             ApartmentListScreen(
                 vm = vm,
-                onApartmentSelected = { navController.navigate(Screen.ContractForm.route) }
+                onApartmentSelected = { navController.navigate(Screen.ContractForm.route) },
+                onSettings = { navController.navigate(Screen.Settings.route) }
             )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Screen.DocumentScan.route) {

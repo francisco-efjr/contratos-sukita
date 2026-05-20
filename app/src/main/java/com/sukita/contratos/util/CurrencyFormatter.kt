@@ -1,21 +1,28 @@
 package com.sukita.contratos.util
 
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.NumberFormat
+import java.util.Locale
+
 /**
  * Utilitário de formatação de valores monetários em Real (BRL).
  */
 object CurrencyFormatter {
 
+    private val ptBR = Locale("pt", "BR")
+
     /**
-     * Converte centavos para string formatada: "650,00"
+     * Converte centavos para string formatada: "650,00" / "1.500,00"
      * (sem o prefixo R$ — o template HTML já inclui)
      */
     fun format(cents: Long): String {
-        val reais = cents / 100
+        val reais    = cents / 100
         val centavos = cents % 100
-        return "%,d,%02d".format(reais, centavos)
-            .replace(",", "X")
-            .replace(".", ",")
-            .replace("X", ".")
+        // Usa o separador de milhar do pt-BR ('.')  + vírgula decimal
+        val nf = NumberFormat.getIntegerInstance(ptBR)
+        nf.isGroupingUsed = true
+        return "${nf.format(reais)},${"%02d".format(centavos)}"
     }
 
     /**
@@ -23,16 +30,26 @@ object CurrencyFormatter {
      * em centavos. Retorna null se inválido.
      */
     fun parseToCents(input: String): Long? {
-        val cleaned = input.trim()
+        val cleaned = input
+            .trim()
             .replace("R$", "")
             .replace(" ", "")
-            .replace(".", "")   // separador de milhar
-            .replace(",", ".")  // separador decimal → ponto
-        return try {
-            val value = cleaned.toDouble()
-            if (value < 0) null else (value * 100).toLong()
-        } catch (e: NumberFormatException) {
-            null
+        val normalized = when {
+            cleaned.contains('.') && cleaned.contains(',') ->
+                cleaned.replace(".", "").replace(",", ".")
+            cleaned.contains(',') ->
+                cleaned.replace(".", "").replace(",", ".")
+            cleaned.count { it == '.' } == 1 && Regex("""\.\d{1,2}$""").containsMatchIn(cleaned) ->
+                cleaned
+            else ->
+                cleaned.replace(".", "")
         }
+
+        val value = normalized.toBigDecimalOrNull() ?: return null
+        if (value < BigDecimal.ZERO) return null
+        return value
+            .movePointRight(2)
+            .setScale(0, RoundingMode.HALF_UP)
+            .toLong()
     }
 }

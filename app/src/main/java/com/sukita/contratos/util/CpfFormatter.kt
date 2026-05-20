@@ -28,7 +28,7 @@ object CpfFormatter {
         if (d.length != 11) return false
         if (d.all { it == d[0] }) return false  // Ex: 111.111.111-11
 
-        fun calcDigit(slice: List<Int>, weights: IntRange): Int {
+        fun calcDigit(slice: List<Int>, weights: IntProgression): Int {
             val sum = slice.zip(weights.toList()).sumOf { (v, w) -> v * w }
             val rem = sum % 11
             return if (rem < 2) 0 else 11 - rem
